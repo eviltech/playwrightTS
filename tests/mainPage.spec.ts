@@ -134,4 +134,14 @@ test.describe('Main page tests', () => {
       .click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   });
+
+  ['light', 'dark'].forEach((value) => {
+    test(`Check style ${value} mode`, async ({ page }) => {
+      await page.evaluate((value) => {
+        document.querySelector('html')?.setAttribute('data-theme-choice', value);
+        document.querySelector('html')?.setAttribute('data-theme', value);
+      }, value);
+      await expect(page).toHaveScreenshot(`pageWith${value}.png`);
+    });
+  });
 });
