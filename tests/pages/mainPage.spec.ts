@@ -1,4 +1,5 @@
 import { test, expect, Page, Locator } from '@playwright/test';
+import { MainPage } from '../models/MainPage';
 
 interface Elements {
   locator: (page: Page) => Locator;
@@ -97,51 +98,45 @@ const elements: Elements[] = [
 
 test.describe('Main page tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('https://playwright.dev/');
+    //await page.goto('https://playwright.dev/');
   });
 
   test('Check header elements visibility', async ({ page }) => {
-    elements.forEach(({ locator, name }) => {
-      test.step(name, async () => {
-        await expect.soft(locator(page)).toBeVisible();
-      });
-    });
+    const mainPage = new MainPage(page);
+    await mainPage.openMainPage();
+    await mainPage.checkElementsVisibility();
   });
 
   test('Check header elements text', async ({ page }) => {
-    elements.forEach(({ locator, name, text }) => {
-      if (text) {
-        test.step(name, async () => {
-          await expect(locator(page)).toContainText(text);
-        });
-      }
-    });
+    const mainPage = new MainPage(page);
+    await mainPage.openMainPage();
+    await mainPage.checkElementsText();
   });
 
   test('Check href attribute', async ({ page }) => {
-    elements.forEach(({ locator, name, attribute }) => {
-      if (attribute) {
-        test.step(name, async () => {
-          await expect(locator(page)).toHaveAttribute(attribute.type, attribute.value);
-        });
-      }
-    });
+    const mainPage = new MainPage(page);
+    await mainPage.openMainPage();
+    await mainPage.checkElementsHrefAttr();
   });
 
   test('Check light-dark mode', async ({ page }) => {
-    await page
-      .getByRole('button', { name: 'Switch between dark and light mode (currently system mode)' })
-      .click();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    const mainPage = new MainPage(page);
+    await mainPage.openMainPage();
+    await mainPage.clickSwitchLightModeButton();
+    await mainPage.checkDataThemeAttr();
   });
 
-  ['light', 'dark'].forEach((value) => {
-    test(`Check style ${value} mode`, async ({ page }) => {
-      await page.evaluate((value) => {
-        document.querySelector('html')?.setAttribute('data-theme-choice', value);
-        document.querySelector('html')?.setAttribute('data-theme', value);
-      }, value);
-      await expect(page).toHaveScreenshot(`pageWith${value}.png`);
-    });
+  test('Check light mode', async ({ page }) => {
+    const mainPage = new MainPage(page);
+    await mainPage.openMainPage();
+    await mainPage.setLightMode();
+    await mainPage.checkLayoutLightMode();
+  });
+
+  test('Check dark mode', async ({ page }) => {
+    const mainPage = new MainPage(page);
+    await mainPage.openMainPage();
+    await mainPage.setDarkMode();
+    await mainPage.checkLayoutDarkMode();
   });
 });
